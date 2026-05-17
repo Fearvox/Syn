@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes × Strudel — Code Music Lab</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #1e1e2e;
+      --text: #c0c0d0;
+      --accent: #7c3aed;
+      --accent2: #06b6d4;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --pink: #ec4899;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+      min-height: 100vh;
+      padding: 2rem;
+      padding-bottom: 4rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: #666; font-size: 0.9rem; }
+
+    /* Featured track */
+    .featured {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      background: linear-gradient(135deg, #0f0f1a, #151525);
+      border: 1px solid var(--accent);
+      border-radius: 16px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .featured::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(124,58,237,0.05) 0%, transparent 50%);
+      animation: rotate 20s linear infinite;
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+    .featured .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent), var(--pink));
+      color: white;
+      font-size: 0.65rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      margin-bottom: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .featured h2 {
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+    .featured .meta {
+      color: #555;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .featured .desc {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 1.2rem;
+      line-height: 1.6;
+    }
+    .featured .structure {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 1.5rem;
+      height: 32px;
+    }
+    .featured .structure .section {
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      position: relative;
+      cursor: help;
+    }
+    .featured .structure .section[data-tooltip]:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 110%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a2e;
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .featured .track-code {
+      background: #080810;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+      font-size: 0.72rem;
+      line-height: 1.5;
+      white-space: pre;
+      color: #a0a0b0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .featured .track-actions {
+      display: flex;
+      gap: 0.5rem;
+      position: relative;
+      z-index: 2;
+    }
+    .btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent), #5b21b6);
+      border-color: transparent;
+      color: white;
+    }
+    .btn.primary:hover { opacity: 0.9; }
+    .btn.stop { border-color: var(--red); color: var(--red); }
+
+    /* Other tracks */
+    .section-title {
+      max-width: 900px;
+      margin: 2rem auto 1rem;
+      font-size: 1rem;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .setlist {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .track {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      transition: all 0.3s;
+    }
+    .track:hover { border-color: #333; }
+    .track.playing {
+      border-color: var(--green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+    }
+    .track-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+    .track-title { font-size: 1rem; color: #fff; }
+    .track-meta { font-size: 0.7rem; color: #555; }
+    .track-code {
+      background: #080810;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin-bottom: 0.8rem;
+      overflow-x: auto;
+      font-size: 0.72rem;
+      line-height: 1.5;
+      white-space: pre;
+      color: #a0a0b0;
+      max-height: 180px;
+      overflow-y: auto;
+      display: none;
+    }
+    .track-actions { display: flex; gap: 0.4rem; }
+    .track-actions .btn { padding: 0.35rem 0.7rem; font-size: 0.72rem; }
+
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 0.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #555;
+      z-index: 100;
+    }
+    .loading {
+      text-align: center;
+      padding: 4rem;
+      color: #555;
+    }
+    .loading .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .playing-indicator { color: var(--green); animation: pulse 1.5s infinite; }
+    .genre-tag {
+      display: inline-block;
+      background: rgba(124,58,237,0.15);
+      color: var(--accent);
+      font-size: 0.6rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎵 Hermes × Strudel</h1>
+  <p>Algorithmic code music — composed by AI, powered by Strudel</p>
+</header>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <p>Loading Strudel engine...</p>
+</div>
+
+<!-- FEATURED: Photon Pulse — DnB (Sub Focus / Cesco / Hamdi) -->
+<div class="featured" id="featured" style="display:none">
+  <span class="badge">🔥 New — DnB (174 BPM, 5-track audio analysis)</span>
+  <h2>Photon Pulse <span class="genre-tag">Drum & Bass</span></h2>
+  <div class="meta">174 BPM · E minor · ~4:30 · 192 bars · 7 sections</div>
+  <div class="desc">
+    Drum & Bass arrangement inspired by <strong>Sub Focus</strong> (clean reese bass,
+    anthemic leads, filtered builds), <strong>Cesco</strong> (swanky syncopated bass,
+    minimal arrangement) and <strong>Hamdi - Swing King</strong> (heavy sub, dub reverb,
+    swung 2-step). Built from audio analysis of real DnB tracks: 13.6% sub energy,
+    drop-focused structure, walking reese bass with LFO filter modulation.
+  </div>
+  <div class="structure">
+    <div class="section" style="flex:32; background:rgba(124,58,237,0.2)" data-tooltip="32 bars — 2-step drums alone, filtered">Intro</div>
+    <div class="section" style="flex:16; background:rgba(6,182,212,0.3)" data-tooltip="16 bars — Reese enters, snare rolls">Build</div>
+    <div class="section" style="flex:32; background:rgba(239,68,68,0.4)" data-tooltip="32 bars — Full: bass+lead+drums+pad">Drop</div>
+    <div class="section" style="flex:24; background:rgba(245,158,11,0.2)" data-tooltip="24 bars — Ambient pads, no drums">Breakdown</div>
+    <div class="section" style="flex:8; background:rgba(6,182,212,0.25)" data-tooltip="8 bars — Fast re-entry, riser sweep">Build 2</div>
+    <div class="section" style="flex:40; background:rgba(236,72,153,0.35)" data-tooltip="40 bars — Extended drop, Cesco swing bass">Drop 2</div>
+    <div class="section" style="flex:40; background:rgba(124,58,237,0.15)" data-tooltip="40 bars — Fade with increasing delay">Outro</div>
+  </div>
+  <div class="track-code" id="featured-code"></div>
+  <div class="track-actions">
+    <button class="btn primary" onclick="playFeatured()">▶ Play Full Track</button>
+    <button class="btn stop" onclick="stopAll()">⏹ Stop</button>
+    <button class="btn" onclick="toggleFeaturedCode()">{ } Show Code</button>
+    <button class="btn" onclick="copyFeaturedCode()">📋 Copy</button>
+  </div>
+</div>
+
+<div class="section-title">Other Sketches</div>
+<div class="setlist" id="setlist" style="display:none"></div>
+
+<div class="status-bar">
+  <span id="status-text">Ready</span>
+  <span id="playing-count"></span>
+</div>
+
+<script src="strudel-web.js"></script>
+<script>
+// ============================================================
+// OTHER SKETCHES — Must be defined BEFORE FEATURED_CODE
+// ============================================================
+const compositions = [
+  {
+    name: "Photon Pulse",
+    desc: "DnB — Sub Focus / Cesco / Hamdi style (174 BPM, audio-analyzed)",
+    bpm: 174,
+    code: photonPulseCode,
+  },
+  {
+    name: "Neon Pressure",
+    desc: "Bass House — Full Arrangement (researched from 520 SC tracks)",
+    bpm: 128,
+    code: `setcpm(128/4)
+// NEON PRESSURE — Bass House
+// Intro(16) → Build(16) → Drop(32) → Brkdn(16) → Build2(16) → Drop2(44) → Outro(28)
+$: arrange(
+  [64, stack(
+    note("[0]").sound("bd808").gain(.5).cutoff(1500),
+    note("[0 0 0 0]*2").sound("hhc").gain(.35).hcutoff(800),
+    note("0 2 0 2").sound("hho").gain(.2).hcutoff(800),
+    note("[0 0 0 0]*4").sound("shaker").gain(.15).hcutoff(600)
+  )],
+  [64, stack(
+    note("[0]").sound("bd808").gain(.9).cutoff(3000).resonance(.1),
+    note("0 2").sound("clap").gain(.8).hcutoff(120).bandf(2500),
+    note("[0 0 0 0]*2").sound("hhc").gain(.5).hcutoff(800),
+    note("0 2 0 2").sound("hho").gain(.35).hcutoff(800),
+    note("[0 0 0 0]*4").sound("shaker").gain(.25).hcutoff(600),
+    note("[c1 ~ ~ ~] [~ c1] [c1 ~ ~ ~] [~ c1 c1 ~]").sound("sine").lpf(120).gain(.3),
+    note("[c2 ~ ~ ~] [~ eb2] [c2 ~ ~ ~] [~ c2 c2 ~]").sound("sawtooth").cutoff(saw.range(200,600).slow(16)).resonance(.4).shape(.6).crush(8).gain(.4),
+    note("[c4 ~ ~ ~] [eb4 ~ ~ ~] [g4 ~ ~ ~] [bb4 ~ ~ ~]").sound("sawtooth").gain(.15).cutoff(500)
+  )],
+  [128, stack(
+    note("[0]").sound("bd808").gain(1).cutoff(4000).resonance(.2),
+    note("0 2").sound("clap").gain(.9).hcutoff(120).bandf(2500),
+    note("[0 0 0 0]*2").sound("hhc").gain(.5).hcutoff(800),
+    note("0 2 0 2").sound("hho").gain(.35).hcutoff(800),
+    note("[0 0 0 0]*4").sound("shaker").gain(.3).hcutoff(600),
+    note("[~ ~ 0 ~] [~ 0 ~ ~] [0 ~ 0 ~] [~ 0 ~ 0]").sound("toms").gain(.4).hcutoff(400),
+    note("[c1 ~ c1 ~] [~ c1] [c1 ~ c1 ~] [~ c1 c1 ~]").sound("sine").lpf(120).gain(.5),
+    note("[c2 ~ c2 ~] [~ eb2] [c2 ~ c2 ~] [~ c2 c2 ~]").sound("sawtooth").cutoff(800).resonance(.4).shape(.6).crush(8).gain(.7),
+    note("[c4 ~ ~ ~] [eb4 ~ ~ ~] [g4 ~ ~ ~] [bb4 ~ ~ ~]").sound("square").gain(.3).cutoff(2000).resonance(.3).delay(.25).delayfeedback(.15),
+    note("[c3 eb3 g3] ~ [~ ~ ~ ~] [~ ~ ~ ~]").sound("sawtooth").gain(.2).cutoff(4000).attack(.01).release(.15)
+  )],
+  [64, stack(
+    note("[0 0 0 0]*2").sound("hhc").gain(.2).hcutoff(2000),
+    note("[c1 ~~~]").sound("sine").lpf(120).gain(.2),
+    note("[c2 ~~~]").sound("sawtooth").cutoff(300).crush(4).gain(.3),
+    note("[c4 ~ ~ ~] [eb4 ~ ~ ~] [g4 ~ ~ ~] [bb4 ~ ~ ~]").sound("sawtooth").gain(.25).cutoff(2000).room(.8).roomfade(6),
+    note("0").sound("noise").gain(.01).room(.9).roomfade(8).delay(.5).delayfeedback(.7)
+  )],
+  [64, stack(
+    note("[0]").sound("bd808").gain(.9),
+    note("[0 0 0 0]*2").sound("hhc").gain(saw.range(.3,.6).slow(16)).hcutoff(800),
+    note("0 2 0 2").sound("hho").gain(.3).hcutoff(800),
+    note("[0 0 0 0]*4").sound("shaker").gain(.25).hcutoff(600),
+    note("[c1 ~ c1 ~] [~ c1] [c1 ~ c1 ~] [~ c1 c1 ~]").sound("sine").lpf(120).gain(.3),
+    note("[c2 ~ c2 ~] [~ eb2] [c2 ~ c2 ~] [~ c2 c2 ~]").sound("sawtooth").cutoff(saw.range(400,1000).slow(16)).resonance(.4).shape(.5).crush(6).gain(.5),
+    note("0").sound("noise").gain(saw.range(0,.08).slow(16)).cutoff(saw.range(200,16000).slow(16))
+  )],
+  [176, stack(
+    note("[0]").sound("bd808").gain(1),
+    note("0 2").sound("clap").gain(.9),
+    note("[0 0 0 0]*2").sound("hhc").gain(.5),
+    note("0 2 0 2").sound("hho").gain(.35),
+    note("[0 0 0 0]*4").sound("shaker").gain(.3),
+    note("[~ ~ 0 ~] [~ 0 ~ ~] [0 ~ 0 ~] [~ 0 ~ 0]").sound("toms").gain(.4),
+    note("[c1 ~ c1 ~] [~ c1] [c1 ~ c1 ~] [~ c1 c1 ~]").sound("sine").lpf(120).gain(.5),
+    note("[c2 ~ c2 ~] [~ g2] [c2 ~ c2 ~] [~ g2 c2 ~]").sound("sawtooth").cutoff(800).resonance(.4).shape(.6).crush(8).gain(.7),
+    note("[c4 ~ ~ ~] [eb4 ~ ~ ~] [g4 ~ ~ ~] [bb4 ~ ~ ~]").sound("square").gain(.3).cutoff(2000).delay(.25).delayfeedback(.15),
+    note("[c5 g5] ~ [bb5 ~] ~").sound("square").gain(.2).cutoff(3000).delay(.375).delayfeedback(.2)
+  )],
+  [80, stack(
+    note("[0]").sound("bd808").gain(saw.range(.6,0).slow(20)),
+    note("[0 0 0 0]*2").sound("hhc").gain(saw.range(.4,0).slow(20)),
+    note("0 2").sound("clap").gain(saw.range(.6,0).slow(16)),
+    note("[c4 eb4 g4]").sound("sawtooth").gain(saw.range(.2,0).slow(24)).room(.6).roomfade(4).delay(.25).delayfeedback(saw.range(.2,.8).slow(24))
+  )]
+)`,
+  },
+  {
+    name: "Binary Rain (Full)",
+    desc: "Breakbeat / Liquid DnB — full arrangement",
+    bpm: 140,
+    code: binaryRainFullCode,
+  },
+  {
+    name: "Neural Drift",
+    desc: "Ambient generative textures",
+    bpm: 75,
+  },
+  {
+    name: "Acid Cascade",
+    desc: "Driving acid bassline + 909",
+    bpm: 128,
+    code: `setcpm(128/4)\n\n$: note("[<g1 f1>/8](<3 5>,8)").clip(perlin.range(.15, 1.5)).release(.1).sound("sawtooth").lpf(sine.range(400, 800).slow(16)).lpq(cosine.range(6, 14).slow(3)).lpenv(sine.mul(4).slow(4)).lpd(.2).lpa(.02).ftype('24db').rarely(add(note(12))).room(.2).shape(.3).postgain(.5).superimpose(x => x.add(note(12)).delay(.5).bpf(1000)).gain("[.2 1@3]*2")\n\n$: stack(s("bd*2").mask("<0@4 1@16>"), s("hh*8").gain(saw.mul(saw.fast(2))).clip(sine).mask("<0@8 1@16>")).bank('RolandTR909')\n\n$: s("rim(3,8)").room(.3).sometimes(x => x.ply(2)).gain(.4)`
+  },
+  {
+    name: "Coastline",
+    desc: "Lo-fi chill + chords",
+    bpm: 75,
+    code: `setcpm(75/4)\n\n$: s("bd").struct("<[x*<1 2> [~@3 x]] x>")\n$: s("~ [rim, sd:<2 3>]").room("<0 .2>")\n$: n("[0 <1 3>]*<2!3 4>").s("hh")\n$: s("rd:<1!3 2>*2").mask("<0 0 1 1>/16").gain(.5)\n\n$: note("<c4 eb4 g4 bb4>".slow(2)).sound("gm_epiano1:1").phaser(4).room(.5).gain(.6)\n\n$: note("c2 eb2 g2 bb2".slow(4)).sound("gm_acoustic_bass").lpf(600).gain(.5)`
+  },
+  {
+    name: "Supernova",
+    desc: "Cosmic synth arrangement",
+    bpm: 90,
+    code: `setcpm(90/4)\n\n$: note("<c2 [eb2 g2] f2 [bb1 g2]>/2").sound("sawtooth").lpf(400).gain(.5).room(.2)\n\n$: n("<0 2 4 <6 8>>").scale("C4:minor").sound("gm_epiano1:2").delay(.25).room(.6).gain(.4).jux(rev)\n\n$: n("<7 5 4 2 0>".slow(2)).scale("C5:minor:pentatonic").sound("sine").gain(sine.range(.05, .2).slow(8)).pan(saw.slow(6)).room(1).size(4).sometimes(x => x.ply(2))\n\n$: s("bd ~ sd ~, hh*4").bank('RolandTR909').gain(.6)`
+  },
+  {
+    name: "Tokyo Midnight",
+    desc: "Polyrhythmic techno + FM",
+    bpm: 135,
+    code: `setcpm(135/4)\n\n$: note("[<g1 f1>/4](<3 5>,8)").sound("sawtooth").lpf(600).lpenv(3).lpd(.15).lpa(.01).ftype('24db').room(.15).gain("[.3 1]*2")\n\n$: stack(s("bd*4").gain(.8), s("~ sd ~ sd").gain(.7), s("hh*8").gain(sine.range(.1, .5)).clip(.5).sometimes(x => x.speed("2")), s("oh*2").mask("<0 0 1 0>/4").gain(.3)).bank('RolandTR909')\n\n$: note("<c4 eb4 g4 bb4 c5>").sound("triangle").fm(sine.range(3, 8).slow(8)).lpf(sine.range(500, 1000).slow(8)).lpq(5).rarely(ply("2")).chunk(4, fast(2)).gain(perlin.range(.2, .5)).mask("<0 1 1 0>/16").delay(.25).room(.5)`
+  }
+];
+let binaryRainFullCode = '';
+let photonPulseCode = '';
+
+// Load external track code from files
+fetch('binary-rain-full.js')
+  .then(r => r.text())
+  .then(code => { binaryRainFullCode = code; })
+  .catch(() => {});
+
+fetch('photon-pulse.js')
+  .then(r => r.text())
+  .then(code => { photonPulseCode = code; })
+  .catch(() => {});
+
+// ============================================================
+// FEATURED TRACK — points to first composition
+// ============================================================
+const FEATURED_CODE = compositions[0].code;
+
+// ============================================================
+// ENGINE
+// ============================================================
+let engineReady = false;
+let featuredPlaying = false;
+
+async function initEngine() {
+  try {
+    await initStrudel({
+      prebake: async () => {
+        // Load samples with timeout so it doesn't hang forever
+        registerSynthSounds();
+        await Promise.race([
+          samples('github:tidalcycles/dirt-samples'),
+          new Promise(r => setTimeout(r, 10000)),
+        ]);
+      },
+    });
+    engineReady = true;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('featured').style.display = 'block';
+    document.getElementById('featured-code').textContent = FEATURED_CODE;
+    renderSetlist();
+    setStatus('Engine ready — click Play to start');
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      `<p style="color:var(--red)">Error: ${e.message}<br>Click anywhere first, then refresh.</p>`;
+  }
+}
+
+function renderSetlist() {
+  const container = document.getElementById('setlist');
+  container.style.display = 'grid';
+  container.innerHTML = compositions.map((t, i) => `
+    <div class="track" id="track-${i}">
+      <div class="track-header">
+        <span class="track-title">${t.name}</span>
+        <span class="track-meta">${t.bpm} BPM · ${t.desc}</span>
+      </div>
+      <div class="track-code" id="code-${i}">${escapeHtml(t.code)}</div>
+      <div class="track-actions">
+        <button class="btn" onclick="playSketch(${i})">▶ Play</button>
+        <button class="btn stop" onclick="stopAll()">⏹</button>
+        <button class="btn" onclick="toggleCode(${i})">{ }</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function playFeatured() {
+  if (!engineReady) return;
+  hush();
+  evaluate(FEATURED_CODE);
+  featuredPlaying = true;
+  document.getElementById('featured').style.borderColor = 'var(--green)';
+  setStatus('▶ Playing: Photon Pulse (DnB) — ~4:30 minutes');
+}
+
+function playSketch(i) {
+  if (!engineReady) return;
+  hush();
+  featuredPlaying = false;
+  document.getElementById('featured').style.borderColor = 'var(--accent)';
+  evaluate(compositions[i].code);
+  document.querySelectorAll('.track').forEach((el, j) => {
+    el.classList.toggle('playing', j === i);
+  });
+  setStatus(`▶ Playing: ${compositions[i].name}`);
+}
+
+function stopAll() {
+  hush();
+  featuredPlaying = false;
+  document.getElementById('featured').style.borderColor = 'var(--accent)';
+  document.querySelectorAll('.track').forEach(el => el.classList.remove('playing'));
+  setStatus('Stopped');
+}
+
+function toggleFeaturedCode() {
+  const el = document.getElementById('featured-code');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleCode(i) {
+  const el = document.getElementById(`code-${i}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function copyFeaturedCode() {
+  navigator.clipboard.writeText(FEATURED_CODE).then(() => {
+    setStatus('Code copied to clipboard!');
+  });
+}
+
+function setStatus(text) {
+  document.getElementById('status-text').textContent = text;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.addEventListener('click', () => {
+  if (!engineReady) initEngine();
+}, { once: true });
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    if (!engineReady) {
+      document.getElementById('loading').innerHTML =
+        `<div class="spinner"></div><p>Click anywhere to initialize audio engine</p>`;
+    }
+  }, 3000);
+});
+</script>
+</body>
+</html>
