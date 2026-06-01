@@ -74,7 +74,7 @@
     "jsdoc-json": "^2.0.2",
     "lerna": "^8.1.9",
     "prettier": "^3.4.2",
-    "vitest": "^3.0.4",
+    "vitest": "^4.1.0",
     "vite-plugin-bundle-audioworklet": "workspace:*"
   },
   "engines": {
